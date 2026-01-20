@@ -99,4 +99,4 @@ Luego accede a **http://127.0.0.1:8000/admin/**
 
 ## 📄 Licencia
 
-Este proyecto fue desarrollado por Agustín Figueroa (afigueroas@eafit.edu.co) para uso académico en EAFIT.
+Este proyecto fue desarrollado por Agustín Figueroa Sierra (afigueroas@eafit.edu.co) para uso académico en EAFIT.
