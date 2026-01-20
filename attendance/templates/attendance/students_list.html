@@ -1,0 +1,77 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Estudiantes{% endblock %}
+
+{% block content %}
+<div class="students-page">
+    <div class="page-header">
+        <div class="header-with-action">
+            <div>
+                <h2 class="page-title">👥 Estudiantes</h2>
+                <p class="page-description">{{ total_students }} estudiantes activos</p>
+            </div>
+            <a href="{% url 'attendance:students_manage' %}" class="btn btn-primary">
+                ⚙️ Gestionar estudiantes
+            </a>
+        </div>
+    </div>
+
+    <div class="students-table-container">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>GitHub</th>
+                    <th>Asistencia</th>
+                    <th>Competencias</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in students_data %}
+                <tr class="student-row"
+                    onclick="window.location='{% url 'attendance:student_detail' item.student.id %}'">
+                    <td class="student-name-cell">
+                        <a href="{% url 'attendance:student_detail' item.student.id %}">
+                            {{ item.student.full_name }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if item.student.email %}
+                        <span class="email-text">{{ item.student.email }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.student.github_username %}
+                        <a href="https://github.com/{{ item.student.github_username }}" target="_blank"
+                            class="github-link" onclick="event.stopPropagation()">
+                            @{{ item.student.github_username }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span
+                            class="percentage-badge {% if item.attendance_percentage >= 80 %}good{% elif item.attendance_percentage >= 60 %}warning{% else %}danger{% endif %}">
+                            {{ item.attendance_percentage }}%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="competencies-count">
+                            {{ item.competencies_achieved }}/{{ item.total_competencies }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-cell">No hay estudiantes registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

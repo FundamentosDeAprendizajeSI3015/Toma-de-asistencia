@@ -1,0 +1,102 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Gestionar Estudiantes{% endblock %}
+
+{% block content %}
+<div class="manage-students-page">
+    <div class="page-header">
+        <a href="{% url 'attendance:students_list' %}" class="back-link">← Volver a estudiantes</a>
+        <h2 class="page-title">⚙️ Gestionar Estudiantes</h2>
+    </div>
+
+    <div class="manage-sections">
+        <div class="add-student-section">
+            <h3 class="section-subtitle">➕ Añadir nuevo estudiante</h3>
+            <form method="post" class="add-student-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name">Nombre *</label>
+                        <input type="text" id="first_name" name="first_name" required placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Apellido *</label>
+                        <input type="text" id="last_name" name="last_name" required placeholder="Apellido">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="github_username">Usuario GitHub</label>
+                        <input type="text" id="github_username" name="github_username" placeholder="usuario">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">➕ Añadir estudiante</button>
+            </form>
+        </div>
+
+        <div class="active-students-section">
+            <h3 class="section-subtitle">✓ Estudiantes activos ({{ active_students.count }})</h3>
+            <div class="students-manage-list">
+                {% for student in active_students %}
+                <div class="student-manage-card">
+                    <div class="student-manage-info">
+                        <span class="student-name">{{ student.full_name }}</span>
+                        <span class="student-email">{{ student.email|default:"-" }}</span>
+                    </div>
+                    <div class="student-manage-actions">
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="deactivate">
+                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                            <button type="submit" class="btn btn-secondary btn-small" title="Desactivar">
+                                ⏸️ Desactivar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">No hay estudiantes activos</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if inactive_students %}
+        <div class="inactive-students-section">
+            <h3 class="section-subtitle">⏸️ Estudiantes inactivos ({{ inactive_students.count }})</h3>
+            <div class="students-manage-list">
+                {% for student in inactive_students %}
+                <div class="student-manage-card inactive">
+                    <div class="student-manage-info">
+                        <span class="student-name">{{ student.full_name }}</span>
+                        <span class="student-email">{{ student.email|default:"-" }}</span>
+                    </div>
+                    <div class="student-manage-actions">
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="activate">
+                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                            <button type="submit" class="btn btn-primary btn-small" title="Reactivar">
+                                ▶️ Activar
+                            </button>
+                        </form>
+                        <form method="post" style="display: inline;"
+                            onsubmit="return confirm('¿Eliminar permanentemente a {{ student.full_name }}?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                            <button type="submit" class="btn btn-danger btn-small" title="Eliminar">
+                                🗑️ Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

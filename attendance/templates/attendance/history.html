@@ -1,0 +1,41 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Historial de Asistencia{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <h2 class="page-title">📊 Historial de Asistencia</h2>
+        <p class="page-description">Registro de todas las sesiones de asistencia</p>
+    </div>
+
+    <div class="sessions-list">
+        {% for item in sessions_data %}
+        <a href="{% url 'attendance:session_detail' item.session.id %}" class="session-card">
+            <div class="session-date">
+                <span class="date-day">{{ item.session.date|date:"d" }}</span>
+                <span class="date-month">{{ item.session.date|date:"M" }}</span>
+                <span class="date-year">{{ item.session.date|date:"Y" }}</span>
+            </div>
+            <div class="session-info">
+                <h3 class="session-title">{{ item.session.description|default:"Sesión de clase" }}</h3>
+                <div class="session-stats">
+                    <span class="stat present">✓ {{ item.present }} presentes</span>
+                    <span class="stat absent">✗ {{ item.absent }} ausentes</span>
+                </div>
+            </div>
+            <div class="session-percentage">
+                <div class="percentage-circle" style="--percentage: {{ item.percentage }}">
+                    <span class="percentage-value">{{ item.percentage }}%</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <p>No hay registros de asistencia aún.</p>
+            <p><a href="{% url 'attendance:index' %}">Toma la asistencia de hoy</a> para comenzar.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Detalle - {{ session.date|date:"d/m/Y" }}{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="page-header">
+        <a href="{% url 'attendance:history' %}" class="back-link">← Volver al historial</a>
+        <div class="header-with-action">
+            <div>
+                <h2 class="page-title">{{ session.description|default:"Sesión de clase" }}</h2>
+                <p class="current-date">📅 {{ session.date|date:"l, d \d\e F \d\e Y" }}</p>
+            </div>
+            {% if can_edit %}
+            <a href="{% url 'attendance:edit_session' session.id %}" class="btn btn-primary">
+                ✏️ Editar asistencia
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="stats-summary">
+        <div class="stat-card present">
+            <span class="stat-number">{{ present_count }}</span>
+            <span class="stat-label">Presentes</span>
+        </div>
+        <div class="stat-card absent">
+            <span class="stat-number">{{ absent_count }}</span>
+            <span class="stat-label">Ausentes</span>
+        </div>
+    </div>
+
+    <div class="records-container">
+        <div class="records-section">
+            <h3 class="section-title present-title">✓ Presentes</h3>
+            <ul class="records-list">
+                {% for record in records %}
+                {% if record.is_present %}
+                <li class="record-item present">
+                    <span class="student-name">{{ record.student.full_name }}</span>
+                    {% if record.student.github_username %}
+                    <a href="https://github.com/{{ record.student.github_username }}" target="_blank"
+                        class="github-link">
+                        @{{ record.student.github_username }}
+                    </a>
+                    {% endif %}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="records-section">
+            <h3 class="section-title absent-title">✗ Ausentes</h3>
+            <ul class="records-list">
+                {% for record in records %}
+                {% if not record.is_present %}
+                <li class="record-item absent">
+                    <span class="student-name">{{ record.student.full_name }}</span>
+                    {% if record.student.github_username %}
+                    <a href="https://github.com/{{ record.student.github_username }}" target="_blank"
+                        class="github-link">
+                        @{{ record.student.github_username }}
+                    </a>
+                    {% endif %}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}{{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="student-detail-page">
+    <div class="page-header">
+        <a href="{% url 'attendance:students_list' %}" class="back-link">← Volver a estudiantes</a>
+        <h2 class="page-title">{{ student.full_name }}</h2>
+    </div>
+
+    <div class="student-info-section">
+        <div class="info-card">
+            <h3 class="section-subtitle">📧 Información de contacto</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">
+                        {% if student.email %}
+                        <a href="mailto:{{ student.email }}">{{ student.email }}</a>
+                        {% else %}
+                        <span class="text-muted">No registrado</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">GitHub</span>
+                    <span class="info-value">
+                        {% if student.github_username %}
+                        <a href="https://github.com/{{ student.github_username }}" target="_blank" class="github-link">
+                            @{{ student.github_username }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">No registrado</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-card">
+            <h3 class="section-subtitle">📊 Estadísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value success">{{ attendance_count }}</span>
+                    <span class="stat-label">Asistencias</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value danger">{{ absence_count }}</span>
+                    <span class="stat-label">Faltas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value primary">{{ attendance_percentage }}%</span>
+                    <span class="stat-label">Asistencia</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value primary">{{ competencies_achieved }}/{{ total_competencies }}</span>
+                    <span class="stat-label">Competencias</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="competencies-section">
+        <div class="section-header">
+            <h3 class="section-subtitle">🎯 Competencias</h3>
+            <button class="btn btn-primary" id="saveCompetencies">
+                <span class="btn-text">💾 Guardar cambios</span>
+                <span class="btn-loading" style="display: none;">Guardando...</span>
+            </button>
+        </div>
+
+        <div class="competencies-grid">
+            {% for item in competencies_data %}
+            <div class="competency-card">
+                <label class="competency-checkbox-label">
+                    <input type="checkbox" class="competency-checkbox" data-competency-id="{{ item.competency.id }}" {{
+                        item.is_achieved|yesno:"checked," }}>
+                    <span class="checkbox-custom"></span>
+                    <div class="competency-info">
+                        <span class="competency-name">{{ item.competency.name }}</span>
+                        <span class="competency-description">{{ item.competency.description }}</span>
+                    </div>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <span class="toast-message"></span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const STUDENT_ID = {{ student.id }};
+    const SAVE_URL = '/student/' + STUDENT_ID + '/competencies/save/';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const saveBtn = document.getElementById('saveCompetencies');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async function () {
+                const btnText = saveBtn.querySelector('.btn-text');
+                const btnLoading = saveBtn.querySelector('.btn-loading');
+
+                const checkboxes = document.querySelectorAll('.competency-checkbox');
+                const competenciesData = {};
+
+                checkboxes.forEach(checkbox => {
+                    const competencyId = checkbox.getAttribute('data-competency-id');
+                    competenciesData[competencyId] = checkbox.checked;
+                });
+
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                saveBtn.disabled = true;
+
+                try {
+                    const response = await fetch(SAVE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ competencies: competenciesData })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showToast('✓ ' + result.message, 'success');
+                    } else {
+                        showToast('Error: ' + (result.error || 'No se pudo guardar'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Error al guardar', 'error');
+                } finally {
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    saveBtn.disabled = false;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
