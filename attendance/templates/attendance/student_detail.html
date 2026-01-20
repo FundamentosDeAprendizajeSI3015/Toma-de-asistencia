@@ -83,8 +83,8 @@
             {% for item in competencies_data %}
             <div class="competency-card">
                 <label class="competency-checkbox-label">
-                    <input type="checkbox" class="competency-checkbox" data-competency-id="{{ item.competency.id }}" {{
-                        item.is_achieved|yesno:"checked," }}>
+                    <input type="checkbox" class="competency-checkbox" {% if item.is_achieved %}checked{% endif %}
+                        data-competency-id="{{ item.competency.id }}">
                     <span class="checkbox-custom"></span>
                     <div class="competency-info">
                         <span class="competency-name">{{ item.competency.name }}</span>
